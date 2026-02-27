@@ -508,6 +508,14 @@
         function selectAnswer(index) {
             answers[currentQuestion] = index;
             displayQuestion();
+
+            // Если ответ правильный, автоматически переходим на следующий вопрос
+            const q = currentTest.questions[currentQuestion];
+            if (index === q.correct) {
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1000); // 1 секунда задержки, чтобы пользователь видел результат
+            }
         }
 
         function updateButtons() {
