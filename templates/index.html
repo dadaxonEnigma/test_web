@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Обучающий Бот</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Start Screen */
+        .start-screen .test-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .test-btn {
+            padding: 16px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .test-btn:hover {
+            background: #f0f4ff;
+            transform: translateX(4px);
+        }
+
+        .test-count {
+            font-size: 14px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* Mode Screen */
+        .mode-screen {
+            text-align: center;
+        }
+
+        .mode-screen h2 {
+            color: #333;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .mode-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 30px 0;
+        }
+
+        .mode-btn {
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.hint {
+            background: #e8ecff;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .mode-btn.hint:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .mode-btn.exam {
+            background: #fff0f0;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
+        .mode-btn.exam:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .mode-description {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Quiz Screen */
+        .quiz-screen {
+            display: none;
+        }
+
+        .quiz-screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .hint-badge {
+            font-size: 12px;
+            color: #22c55e;
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .answer-btn {
+            padding: 14px 16px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .answer-btn.selected {
+            border-color: #667eea;
+            background: #e8ecff;
+        }
+
+        .answer-btn.correct {
+            border-color: #22c55e;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .answer-btn.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Results Screen */
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .results-screen.active {
+            display: block;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-text {
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .results-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .results-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .results-details p {
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Тест Обучающий Бот</h1>
+            <p>Ёқимли дарс ўрганиш</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="screen start-screen active" id="startScreen">
+            <div class="test-list" id="testList"></div>
+            <button class="btn btn-secondary" onclick="refreshTests()" style="width: 100%; margin-top: 20px;">🔄 Обновить</button>
+        </div>
+
+        <!-- Mode Screen -->
+        <div class="screen mode-screen" id="modeScreen">
+            <h2 id="testNameDisplay"></h2>
+            <div class="mode-buttons">
+                <button class="mode-btn hint" onclick="startTest('hint')">
+                    📚 С подсказкой
+                    <div class="mode-description">Видишь правильный ответ</div>
+                </button>
+                <button class="mode-btn exam" onclick="startTest('exam')">
+                    📝 Экзамен
+                    <div class="mode-description">Ответы скрыты, показываем если ошибка</div>
+                </button>
+            </div>
+            <button class="btn btn-secondary" onclick="goToStart()" style="width: 100%; margin-top: 20px;">← Назад</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div class="screen quiz-screen" id="quizScreen">
+            <div class="progress-text" id="progressText">Вопрос 1 / 10</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="question">
+                <h2 id="questionText">Вопрос</h2>
+                <div class="hint-badge" id="hintBadge" style="display: none;">✅ = Правильный ответ</div>
+            </div>
+
+            <div class="answers" id="answersContainer"></div>
+
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">← Назад</button>
+                <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>Дальше →</button>
+            </div>
+            <button class="btn btn-secondary" onclick="goToStart()" style="width: 100%; margin-top: 12px;">🏠 Главное меню</button>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="screen results-screen" id="resultsScreen">
+            <h2>Результаты</h2>
+            <div class="score-circle">
+                <div class="score-text" id="scorePercent">0%</div>
+            </div>
+            <div class="results-message" id="resultMessage">Отлично!</div>
+            <div class="results-details">
+                <p id="scoreDetails">Правильно: 0 / 0</p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="goToStart()">📚 Главное меню</button>
+                <button class="btn btn-primary" onclick="retakeTest()">🔄 Повторить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTest = null;
+        let currentMode = null;
+        let currentQuestion = 0;
+        let answers = [];
+        let allTests = [];
+
+        // Load tests
+        async function loadTests() {
+            try {
+                const response = await fetch('/api/tests');
+                allTests = await response.json();
+                displayTests();
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
+        function displayTests() {
+            const testList = document.getElementById('testList');
+            testList.innerHTML = '';
+
+            allTests.forEach(test => {
+                const btn = document.createElement('button');
+                btn.className = 'test-btn';
+                btn.innerHTML = `
+                    <div>📚 ${test.name}</div>
+                    <div class="test-count">${test.count} вопросов</div>
+                `;
+                btn.onclick = () => selectTest(test.name);
+                testList.appendChild(btn);
+            });
+        }
+
+        function selectTest(testName) {
+            document.getElementById('testNameDisplay').textContent = testName;
+            showScreen('modeScreen');
+        }
+
+        async function startTest(mode) {
+            currentMode = mode;
+            currentQuestion = 0;
+            answers = [];
+
+            try {
+                const testName = document.getElementById('testNameDisplay').textContent;
+                const response = await fetch(`/api/test/${encodeURIComponent(testName)}`);
+                currentTest = await response.json();
+
+                displayQuestion();
+                showScreen('quizScreen');
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
+        function displayQuestion() {
+            const q = currentTest.questions[currentQuestion];
+            document.getElementById('questionText').textContent = q.text;
+            document.getElementById('progressText').textContent = `Вопрос ${currentQuestion + 1} / ${currentTest.questions.length}`;
+
+            const percent = ((currentQuestion + 1) / currentTest.questions.length) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+
+            const hintBadge = document.getElementById('hintBadge');
+            hintBadge.style.display = currentMode === 'hint' ? 'block' : 'none';
+
+            const container = document.getElementById('answersContainer');
+            container.innerHTML = '';
+
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+
+                if (currentMode === 'hint' && index === q.correct) {
+                    btn.textContent = '✅ ' + option;
+                } else {
+                    btn.textContent = option;
+                }
+
+                btn.onclick = () => selectAnswer(index);
+
+                if (answers[currentQuestion] !== undefined) {
+                    btn.disabled = true;
+                    if (index === answers[currentQuestion]) {
+                        btn.classList.add('selected');
+                    }
+                    if (index === q.correct && answers[currentQuestion] !== q.correct) {
+                        btn.classList.add('correct');
+                    } else if (index === answers[currentQuestion] && index !== q.correct) {
+                        btn.classList.add('incorrect');
+                    }
+                }
+
+                container.appendChild(btn);
+            });
+
+            updateButtons();
+        }
+
+        function selectAnswer(index) {
+            answers[currentQuestion] = index;
+            displayQuestion();
+        }
+
+        function updateButtons() {
+            const hasAnswer = answers[currentQuestion] !== undefined;
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').disabled = !hasAnswer;
+
+            if (currentQuestion === currentTest.questions.length - 1 && hasAnswer) {
+                document.getElementById('nextBtn').textContent = 'Результаты →';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Дальше →';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < currentTest.questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function showResults() {
+            const correct = answers.filter((ans, idx) => ans === currentTest.questions[idx].correct).length;
+            const total = currentTest.questions.length;
+            const percent = Math.round((correct / total) * 100);
+
+            document.getElementById('scorePercent').textContent = percent + '%';
+            document.getElementById('scoreDetails').textContent = `Правильно: ${correct} / ${total}`;
+
+            let message = '';
+            if (percent === 100) {
+                message = '🎉 Отлично! Все правильно!';
+            } else if (percent >= 80) {
+                message = '👏 Хорошо работаешь!';
+            } else if (percent >= 60) {
+                message = '📚 Продолжай учиться!';
+            } else {
+                message = '💪 Повтори ошибки!';
+            }
+
+            document.getElementById('resultMessage').textContent = message;
+            showScreen('resultsScreen');
+        }
+
+        function goToStart() {
+            currentTest = null;
+            currentQuestion = 0;
+            answers = [];
+            showScreen('startScreen');
+        }
+
+        function refreshTests() {
+            loadTests();
+        }
+
+        function retakeTest() {
+            currentQuestion = 0;
+            answers = [];
+            displayQuestion();
+            showScreen('quizScreen');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Initialize
+        loadTests();
+    </script>
+</body>
+</html>
